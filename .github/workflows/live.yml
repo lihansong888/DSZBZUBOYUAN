@@ -1,29 +1,37 @@
-name: Sync zuboyuan Source
+name: Update IPTV Live M3U8
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'watchtv/live.py'
-      - '.github/workflows/live.yml'
-  workflow_dispatch:
+  workflow_dispatch: # 支持手动触发
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 */6 * * *' # 每 6 小时自动运行一次
 
 jobs:
-  sync:
+  update-sources:
     runs-on: ubuntu-latest
+    timeout-minutes: 20  # 设置最大运行时间为 20 分钟，防止测速较慢时被强行终止
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-      - run: pip install requests
-      - run: ls -R
-      - run: python watchtv/live.py
-      - run: |
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run IPTV filter script
+        run: python watchtv/live.py
+
+      - name: Commit and push changes
+        run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add watchtv/live.m3u8
-          git commit -m "auto update live.m3u8" || echo "nothing changed"
+          git commit -m "auto update live.m3u8" || echo "No changes to commit"
+          git pull --rebase origin main || echo "No remote changes to rebase"
           git push origin main

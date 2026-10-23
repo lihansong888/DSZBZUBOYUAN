@@ -10,7 +10,7 @@ OUTPUT_PATH = "watchtv/live.m3u8"
 # 线程池并发数调整为 20，降低服务器压力防误判
 MAX_WORKERS = 20
 # 检测链接超时的秒数调整为 5 秒
-TIMEOUT_SECONDS = 5
+TIMEOUT_SECONDS = 6
 
 def check_url(channel_info):
     """检测单个直播源是否有效"""

@@ -7,10 +7,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 URL = "https://raw.githubusercontent.com/q1017673817/iptvz/refs/heads/main/zubo_all.txt"
 # 输出路径
 OUTPUT_PATH = "watchtv/live.m3u8"
-# 线程池并发数
-MAX_WORKERS = 50
-# 检测链接超时的秒数
-TIMEOUT_SECONDS = 3
+# 线程池并发数调整为 20，降低服务器压力防误判
+MAX_WORKERS = 20
+# 检测链接超时的秒数调整为 5 秒
+TIMEOUT_SECONDS = 5
 
 def check_url(channel_info):
     """检测单个直播源是否有效"""
@@ -96,7 +96,7 @@ def fetch_and_filter_iptv():
             if is_valid:
                 valid_channels.append((name, url))
             
-            if completed_count % 50 == 0 or completed_count == total_count:
+            if completed_count % 20 == 0 or completed_count == total_count:
                 print(f"检测进度: {completed_count}/{total_count} (有效: {len(valid_channels)})")
 
     print(f"检测完成！最终有效频道数: {len(valid_channels)}，正在组装标准的 M3U8 格式...")

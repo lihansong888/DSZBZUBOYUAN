@@ -5,10 +5,6 @@ import os
 URL_LIST = [
     "https://raw.githubusercontent.com/q1017673817/iptvz/refs/heads/main/zubo_all.txt",
 ]
-# 关键词映射：分组包含关键词 -> 输出分组名
-KEYWORD_GROUP = [
-
-]
 # 屏蔽：形如 2026/10/23 21:51更新 的分组
 TIME_PAT = re.compile(r"\d{4}/\d{2}/\d{2} \d{2}:\d{2}更新")
 
@@ -53,7 +49,7 @@ def get_group_title(extinf):
     return ""
 
 def main():
-    channel_list = []      # [(输出分组名, 频道名, 地址)]
+    channel_list = []
     seen = set()
     for url in URL_LIST:
         try:
@@ -64,28 +60,19 @@ def main():
             for extinf, play_url in channels:
                 ch_name = get_channel_name(extinf)
                 ch_group = get_group_title(extinf)
-                # 命中时间更新分组，直接跳过
+                # 跳过时间更新分组
                 if TIME_PAT.search(ch_group):
-                    continue
-                output_group = None
-                # 关键词模糊匹配
-                for kw, out_name in KEYWORD_GROUP:
-                    if kw in ch_group:
-                        output_group = out_name
-                        break
-                if output_group is None:
                     continue
                 item_key = (ch_name, play_url)
                 if item_key not in seen:
                     seen.add(item_key)
-                    channel_list.append((output_group, ch_name, play_url))
+                    channel_list.append((ch_group, ch_name, play_url))
         except Exception as e:
             print(f"⚠️ 拉取 {url} 失败：{e}")
     total_cnt = len(channel_list)
     print(f"✅筛选结束，共提取 {total_cnt} 个频道")
     out_dir = os.path.dirname(os.path.abspath(__file__))
     output_m3u = ["#EXTM3U"]
-    # 按各自映射后的分组名输出
     for output_group, cname, curl in channel_list:
         fake_ext = f'#EXTINF:-1 group-title="{output_group}",{cname}'
         output_m3u.append(fake_ext)

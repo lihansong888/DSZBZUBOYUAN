@@ -1,29 +1,29 @@
-name: Auto Generate iptvz M3U
+name: Sync gangaotaijihe Source
+
 on:
   push:
     branches: [ main ]
-  schedule:
-    - cron: '0 */4 * * *'
-      timezone: Asia/Shanghai
+    paths:
+      - 'watchtv/live.py'
+      - '.github/workflows/live.yml'
   workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'
+
 jobs:
-  build:
+  sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Setup Python3.11
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install requests
-        run: pip install requests
-      - name: Run iptvz.py
-        run: python watchtv/iptvz.py || echo "⚠️ iptvz脚本执行失败，继续往下"
-      - name: Commit and push m3u
-        run: |
-          git config --global user.name "lihansong888"
-          git config --global user.email "lihansong888@shturl."
-          git add watchtv/
-          git commit -m "auto update m3u files" || echo "ℹ️ 没有文件更新，跳过提交"
-          git push
+      - run: pip install requests
+      - run: ls -R
+      - run: python watchtv/live.py
+      - run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add watchtv/live.m3u8
+          git commit -m "auto update live.m3u8" || echo "nothing changed"
+          git push origin main
